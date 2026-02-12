@@ -1,4 +1,4 @@
-import type { TeamState } from '../types/game'
+import type { TeamState, TeamId } from '../types/game'
 
 interface TeamPanelProps {
   team: TeamState
