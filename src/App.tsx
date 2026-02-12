@@ -205,7 +205,7 @@ export default function App() {
 
               <AnswerBoard
                 answers={state.answers}
-                pickMode={pickAnswerDrawFirst || pickAnswerDrawSecond}
+                pickMode={!!(pickAnswerDrawFirst || pickAnswerDrawSecond)}
                 onPickAnswer={
                   pickAnswerDrawFirst
                     ? handleDrawFirstAnswer

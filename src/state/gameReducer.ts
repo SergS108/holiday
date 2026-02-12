@@ -72,8 +72,6 @@ function createInitialTeam(id: TeamId, name: string): GameState['leftTeam'] {
   }
 }
 
-const ROUND_NAMES: GameState['roundIndex'][] = [0, 1, 2, 3, 4]
-
 export function createInitialState(leftName: string, rightName: string): GameState {
   return {
     roundIndex: 0,
