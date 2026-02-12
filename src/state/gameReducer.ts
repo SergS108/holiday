@@ -266,10 +266,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'OTHER_TEAM_WRONG_GUESS': {
       if (state.mainPhase !== 'other_team_one_guess' || !state.playingTeam) return state
       const playingTeam = getTeam(state, state.playingTeam)
+      const otherId = getOtherTeamId(state.playingTeam)
+      const otherTeam = getTeam(state, otherId)
       const updatedPlaying = { ...playingTeam, score: playingTeam.score + state.gameFund }
+      const updatedOther = { ...otherTeam, misses: otherTeam.misses + 1 }
       const next = state.playingTeam === 'left'
-        ? { ...state, leftTeam: updatedPlaying }
-        : { ...state, rightTeam: updatedPlaying }
+        ? { ...state, leftTeam: updatedPlaying, rightTeam: updatedOther }
+        : { ...state, rightTeam: updatedPlaying, leftTeam: updatedOther }
       return {
         ...next,
         gameFund: 0,
