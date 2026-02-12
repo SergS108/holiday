@@ -326,45 +326,65 @@ button:disabled {
   justify-content: center;
 }
 
-/* Крестики промаха */
+/* Крестики промаха — капсулы, красные линии от края до края */
 .misses {
   display: flex;
   flex-direction: column;
-  gap: clamp(0.5rem, 1vh, 1rem);
+  gap: clamp(0.4rem, 1vh, 0.9rem);
   align-items: center;
   justify-content: center;
-  min-width: clamp(40px, 6vw, 60px);
+  min-width: clamp(65px, 9vw, 100px);
+  margin-top: clamp(0.75rem, 2vh, 1.5rem);
 }
 
 .miss-dot {
-  font-size: clamp(1.2rem, 2.5vh, 2rem);
-  font-weight: bold;
-  width: clamp(35px, 5vh, 50px);
-  height: clamp(35px, 5vh, 50px);
+  position: relative;
+  width: clamp(60px, 8vw, 85px);
+  height: clamp(36px, 5vh, 48px);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: 9999px; /* pill/capsule */
   transition: all 0.3s ease;
-  border: clamp(1px, 0.2vh, 2px) solid;
-  background-color: transparent;
+  border: clamp(2px, 0.3vh, 3px) solid;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .miss-dot.active {
-  color: #ff4444;
-  background-color: rgba(255, 68, 68, 0.1);
-  border-color: #ff4444;
+  background: linear-gradient(135deg, #f7dc6f 0%, #e8c335 50%, #d4a517 100%);
+  border-color: #fffde7;
+  box-shadow: 0 0 clamp(6px, 1vh, 10px) rgba(255, 253, 231, 0.7),
+              inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  color: #dc2626;
 }
 
-.miss-dot:not(.active) {
-  color: #999;
-  background-color: rgba(153, 153, 153, 0.1);
-  border-color: #999;
-  opacity: 0.5;
+/* Красные диагональные линии от края до края */
+.miss-dot.active::before,
+.miss-dot.active::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: clamp(4px, 0.7vh, 6px);
+  height: 250%;
+  background: #dc2626;
+  transform-origin: center center;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
+}
+
+.miss-dot.active::before {
+  transform: translate(-50%, -50%) rotate(45deg);
 }
 
 .miss-dot.active::after {
-  content: '✕';
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.miss-dot:not(.active) {
+  background: rgba(200, 200, 200, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
+  opacity: 0.5;
 }
 
 .draw-btn.small {
