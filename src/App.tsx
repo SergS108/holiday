@@ -115,9 +115,9 @@ export default function App() {
   const allRevealed = state.answers.length > 0 && state.answers.every((a) => a.revealed)
 
   const pickAnswerDrawFirst =
-    drawAnswersMode && state.drawAnswerPhase === 'first_answer' && state.drawFirstTeam
+    !!(drawAnswersMode && state.drawAnswerPhase === 'first_answer' && state.drawFirstTeam)
   const pickAnswerDrawSecond =
-    drawAnswersMode && state.drawAnswerPhase === 'second_answer'
+    !!(drawAnswersMode && state.drawAnswerPhase === 'second_answer')
 
   const handleTeamNameLeft = useCallback((name: string) => {
     dispatch({ type: 'RESET_NAMES', leftName: name, rightName: state.rightTeam.name })
