@@ -1,13 +1,13 @@
 import { useReducer, useCallback, useState, useEffect } from 'react'
 import { createInitialState, gameReducer } from './state/gameReducer'
-import { DEFAULT_QUESTIONS, type QuestionData } from './data/questions'
+import { DEFAULT_QUESTIONS, DRAW_QUESTION, type QuestionData } from './data/questions'
 import { TeamPanel } from './components/TeamPanel'
 import { DrawOverlay } from './components/DrawOverlay'
 import { AnswerBoard } from './components/AnswerBoard'
 import { GameControls } from './components/GameControls'
 import type { TeamId } from './types/game'
 
-const ROUND_NAMES = ['Простая игра', 'Двойная игра', 'Тройная игра', 'Игра наоборот', 'Большая игра']
+const ROUND_NAMES = ['Простая игра', 'Двойная игра', 'Тройная игра', 'Игра наоборот']
 
 const TEAM_NAMES_KEY_LEFT = 'game100_teamLeft'
 const TEAM_NAMES_KEY_RIGHT = 'game100_teamRight'
@@ -48,9 +48,19 @@ export default function App() {
 
   const handleStartRound = useCallback(
     (questionIndex: number) => {
-      dispatch({ type: 'START_ROUND', question: getQuestion(questionIndex) })
+      // При первом запуске (questionIndex = 0) показываем розыгрыш с DRAW_QUESTION
+      // Основной вопрос будет установлен после завершения розыгрыша через START_MAIN_GAME
+      // При последующих запусках сразу используем основной вопрос
+      dispatch({ type: 'START_ROUND', drawQuestion: DRAW_QUESTION, mainQuestion: getQuestion(questionIndex) })
     },
     [getQuestion]
+  )
+
+  const handleStartMainGame = useCallback(
+    (question: QuestionData) => {
+      dispatch({ type: 'START_MAIN_GAME', question })
+    },
+    []
   )
 
   const handleDrawPress = useCallback((teamId: TeamId) => {
@@ -59,23 +69,13 @@ export default function App() {
 
   const handleDrawHide = useCallback(() => {
     dispatch({ type: 'DRAW_HIDE_BUTTONS' })
-  }, [])
+    // После скрытия кнопок сразу переходим к основной игре с первым вопросом
+    if (state.drawFirstTeam && !state.drawShown) {
+      const mainQuestion = getQuestion(0)
+      handleStartMainGame(mainQuestion)
+    }
+  }, [state.drawFirstTeam, state.drawShown, getQuestion, handleStartMainGame])
 
-  const handleDrawFirstAnswer = useCallback((index: number) => {
-    dispatch({ type: 'DRAW_FIRST_ANSWER', answerIndex: index })
-  }, [])
-
-  const handleDrawSecondAnswer = useCallback((index: number) => {
-    dispatch({ type: 'DRAW_SECOND_ANSWER', answerIndex: index })
-  }, [])
-
-  const handleDrawWrongFirst = useCallback(() => {
-    dispatch({ type: 'DRAW_WRONG_FIRST' })
-  }, [])
-
-  const handleDrawWrongSecond = useCallback(() => {
-    dispatch({ type: 'DRAW_WRONG_SECOND' })
-  }, [])
 
   const handleRevealAnswer = useCallback((index: number) => {
     dispatch({ type: 'REVEAL_ANSWER', answerIndex: index })
@@ -103,21 +103,32 @@ export default function App() {
 
   const handleNextQuestion = useCallback(() => {
     const nextIndex = state.questionIndex + 1
-    dispatch({ type: 'NEXT_QUESTION', nextQuestion: getQuestion(nextIndex) })
-  }, [state.questionIndex, getQuestion])
+    // После блока 4 (Игра наоборот) игра заканчивается; также при достижении последнего вопроса
+    if (nextIndex >= questions.length || state.roundIndex === 3) {
+      dispatch({ type: 'GAME_END' })
+    } else {
+      dispatch({ type: 'NEXT_QUESTION', mainQuestion: getQuestion(nextIndex) })
+    }
+  }, [state.questionIndex, state.roundIndex, getQuestion, questions.length])
 
-  const hasQuestion = !!state.question
-  const showDrawOverlay = hasQuestion && state.screenPhase === 'draw_buttons' && state.drawPhase !== 'done'
-  const drawAnswersMode = state.screenPhase === 'draw_answers'
+  const hasDrawQuestion = !!state.drawQuestion
+  const hasMainQuestion = !!state.question
+  const showDrawOverlay = !state.drawShown && hasDrawQuestion && state.screenPhase === 'draw_buttons' && state.drawPhase !== 'done'
   const mainPlayMode = state.screenPhase === 'main_play'
   const otherGuessMode = state.screenPhase === 'other_guess'
   const roundEndMode = state.screenPhase === 'round_end'
+  const gameEndMode = state.screenPhase === 'game_end'
   const allRevealed = state.answers.length > 0 && state.answers.every((a) => a.revealed)
+  
+  // После завершения розыгрыша (скрытия кнопок) переходим к основной игре
+  useEffect(() => {
+    if (state.drawPhase === 'done' && state.drawFirstTeam && !hasMainQuestion && !state.drawShown) {
+      // Используем вопрос с индексом 0 (первый вопрос из списка)
+      const mainQuestion = getQuestion(0)
+      handleStartMainGame(mainQuestion)
+    }
+  }, [state.drawPhase, state.drawFirstTeam, hasMainQuestion, state.drawShown, getQuestion, handleStartMainGame])
 
-  const pickAnswerDrawFirst: boolean =
-    !!(drawAnswersMode && state.drawAnswerPhase === 'first_answer' && state.drawFirstTeam)
-  const pickAnswerDrawSecond: boolean =
-    !!(drawAnswersMode && state.drawAnswerPhase === 'second_answer')
 
   const handleTeamNameLeft = useCallback((name: string) => {
     dispatch({ type: 'RESET_NAMES', leftName: name, rightName: state.rightTeam.name })
@@ -135,7 +146,42 @@ export default function App() {
     handleStartRound(0)
   }, [state.leftTeam.name, state.rightTeam.name, handleStartRound])
 
-  if (!hasQuestion) {
+  // Финальный экран с результатами игры
+  if (gameEndMode) {
+    const winner = state.leftTeam.score > state.rightTeam.score 
+      ? state.leftTeam 
+      : state.rightTeam.score > state.leftTeam.score 
+        ? state.rightTeam 
+        : null
+    return (
+      <div className="app">
+        <div className="game-end-screen">
+          <h1 className="game-end-title">Игра окончена!</h1>
+          <div className="game-end-scores">
+            <div className={`game-end-team ${winner?.id === 'left' ? 'winner' : ''}`}>
+              <div className="game-end-team-name">{state.leftTeam.name}</div>
+              <div className="game-end-team-score">{state.leftTeam.score}</div>
+            </div>
+            <div className="game-end-vs">VS</div>
+            <div className={`game-end-team ${winner?.id === 'right' ? 'winner' : ''}`}>
+              <div className="game-end-team-name">{state.rightTeam.name}</div>
+              <div className="game-end-team-score">{state.rightTeam.score}</div>
+            </div>
+          </div>
+          {winner && (
+            <div className="game-end-winner">
+              Победитель: <strong>{winner.name}</strong>
+            </div>
+          )}
+          {!winner && (
+            <div className="game-end-winner">Ничья!</div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  if (!hasDrawQuestion && !hasMainQuestion) {
     return (
       <div className="app">
         <div className="start-teams-row">
@@ -179,7 +225,9 @@ export default function App() {
       {!showDrawOverlay && (
         <>
           <div className="question-header">
-            <div className="question-block">{state.question || '—'}</div>
+            <div className="question-block">
+              {state.question || '—'}
+            </div>
           </div>
 
           <div className="game-content">
@@ -188,31 +236,20 @@ export default function App() {
               isPlaying={state.playingTeam === 'left' && !otherGuessMode && state.screenPhase !== 'round_end'}
               isDrawWinner={false}
               isOtherTeamTurn={otherGuessMode && state.playingTeam === 'right'}
-              isAnsweringInDraw={
-                drawAnswersMode &&
-                ((state.drawAnswerPhase === 'first_answer' && state.drawFirstTeam === 'left') ||
-                  (state.drawAnswerPhase === 'second_answer' && state.drawFirstTeam === 'right'))
-              }
               isRoundWinner={state.screenPhase === 'round_end' && state.roundWinner === 'left'}
+              isBlock4Leader={state.roundIndex === 3 && state.screenPhase === 'round_end' && state.roundWinner === 'left'}
               showDrawButton={false}
+              blockLabel={['x1', 'x2', 'x3', '¿'][state.roundIndex % 4]}
             />
 
             <div className="center-area">
               <div className="round-title">
-                {ROUND_NAMES[state.roundIndex % ROUND_NAMES.length]} · Вопрос {state.questionIndex + 1}
+                {ROUND_NAMES[state.roundIndex % ROUND_NAMES.length]} · Раунд {state.roundInBlock + 1} · Вопрос {state.questionIndex + 1}
               </div>
               <div className="game-fund">{state.gameFund}</div>
 
               <AnswerBoard
                 answers={state.answers}
-                pickMode={pickAnswerDrawFirst || pickAnswerDrawSecond}
-                onPickAnswer={
-                  pickAnswerDrawFirst
-                    ? handleDrawFirstAnswer
-                    : pickAnswerDrawSecond
-                      ? handleDrawSecondAnswer
-                      : undefined
-                }
                 onReveal={
                   mainPlayMode
                     ? handleRevealAnswer
@@ -227,10 +264,7 @@ export default function App() {
               <GameControls
                 screenPhase={state.screenPhase}
                 onWrongAnswer={() => {
-                  if (state.screenPhase === 'draw_answers') {
-                    if (state.drawAnswerPhase === 'first_answer') handleDrawWrongFirst()
-                    else handleDrawWrongSecond()
-                  } else if (state.screenPhase === 'other_guess') {
+                  if (state.screenPhase === 'other_guess') {
                     handleOtherTeamWrong()
                   } else {
                     handleWrongAnswer()
@@ -238,8 +272,10 @@ export default function App() {
                 }}
                 onRevealAllRemaining={handleRevealAll}
                 onNextQuestion={handleNextQuestion}
-                canWrong={mainPlayMode || drawAnswersMode || otherGuessMode}
+                canWrong={mainPlayMode || otherGuessMode}
                 allRevealed={allRevealed}
+                isLastQuestion={state.questionIndex + 1 >= questions.length && state.roundIndex !== 3}
+                nextButtonLabel={state.roundIndex === 3 && state.screenPhase === 'round_end' ? 'Игра окончена' : undefined}
               />
             </div>
 
@@ -248,13 +284,10 @@ export default function App() {
               isPlaying={state.playingTeam === 'right' && !otherGuessMode && state.screenPhase !== 'round_end'}
               isDrawWinner={false}
               isOtherTeamTurn={otherGuessMode && state.playingTeam === 'left'}
-              isAnsweringInDraw={
-                drawAnswersMode &&
-                ((state.drawAnswerPhase === 'first_answer' && state.drawFirstTeam === 'right') ||
-                  (state.drawAnswerPhase === 'second_answer' && state.drawFirstTeam === 'left'))
-              }
               isRoundWinner={state.screenPhase === 'round_end' && state.roundWinner === 'right'}
+              isBlock4Leader={state.roundIndex === 3 && state.screenPhase === 'round_end' && state.roundWinner === 'right'}
               showDrawButton={false}
+              blockLabel={['x1', 'x2', 'x3', '¿'][state.roundIndex % 4]}
             />
           </div>
         </>

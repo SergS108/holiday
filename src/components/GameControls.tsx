@@ -5,6 +5,9 @@ interface GameControlsProps {
   onNextQuestion: () => void
   canWrong?: boolean
   allRevealed?: boolean
+  isLastQuestion?: boolean
+  /** Текст кнопки перехода (в блоке 4 — «Игра окончена») */
+  nextButtonLabel?: string
 }
 
 export function GameControls({
@@ -13,11 +16,13 @@ export function GameControls({
   onRevealAllRemaining,
   onNextQuestion,
   canWrong = true,
-  allRevealed = false
+  allRevealed = false,
+  isLastQuestion = false,
+  nextButtonLabel = 'Следующий раунд / вопрос'
 }: GameControlsProps) {
   const showWrong = (screenPhase === 'main_play' || screenPhase === 'draw_answers' || screenPhase === 'other_guess') && canWrong
   const showRevealAll = screenPhase === 'round_end' && !allRevealed
-  const showNext = screenPhase === 'round_end'
+  const showNext = screenPhase === 'round_end' && !isLastQuestion
 
   return (
     <div className="controls">
@@ -33,7 +38,7 @@ export function GameControls({
       )}
       {showNext && (
         <button type="button" className="btn-next" onClick={onNextQuestion}>
-          Следующий раунд / вопрос
+          {nextButtonLabel}
         </button>
       )}
     </div>

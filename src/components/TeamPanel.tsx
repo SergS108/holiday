@@ -10,10 +10,14 @@ interface TeamPanelProps {
   isAnsweringInDraw?: boolean
   /** В конце раунда: эта команда забрала фонд (подсветка при открытии оставшихся карточек) */
   isRoundWinner?: boolean
+  /** Блок 4: эта команда набрала больше очков (золотая подсветка панели) */
+  isBlock4Leader?: boolean
   /** В фазе розыгрыша: показывать большую кнопку (если ещё waiting) или ничего/крестики */
   showDrawButton: boolean
   onDrawButtonPress?: () => void
   drawButtonDisabled?: boolean
+  /** Подпись блока внизу панели: "x1", "x2", "x3", "¿" */
+  blockLabel?: string
 }
 
 export function TeamPanel({
@@ -23,15 +27,17 @@ export function TeamPanel({
   isOtherTeamTurn,
   isAnsweringInDraw,
   isRoundWinner,
+  isBlock4Leader,
   showDrawButton,
   onDrawButtonPress,
-  drawButtonDisabled
+  drawButtonDisabled,
+  blockLabel
 }: TeamPanelProps) {
   const pressed = team.drawPressedFirst === true
 
   return (
     <div
-      className={`team-panel ${isPlaying || isRoundWinner ? 'playing' : ''} ${isDrawWinner ? 'draw-winner' : ''} ${isOtherTeamTurn ? 'other-turn' : ''} ${isAnsweringInDraw ? 'draw-answering' : ''}`}
+      className={`team-panel ${isPlaying || isRoundWinner ? 'playing' : ''} ${isDrawWinner ? 'draw-winner' : ''} ${isOtherTeamTurn ? 'other-turn' : ''} ${isAnsweringInDraw ? 'draw-answering' : ''} ${isBlock4Leader ? 'block4-leader' : ''}`}
       data-team={team.id}
     >
       <div className="team-name">{team.name}</div>
@@ -63,6 +69,11 @@ export function TeamPanel({
           </div>
         )}
       </div>
+      {blockLabel != null && blockLabel !== '' && (
+        <div className="team-block-label" aria-hidden>
+          {blockLabel}
+        </div>
+      )}
     </div>
   )
 }

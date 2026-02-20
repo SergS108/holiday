@@ -5,6 +5,19 @@ export interface QuestionData {
   answers: { text: string; points: number }[]
 }
 
+/** Вопрос для отборочного раунда (розыгрыша) */
+export const DRAW_QUESTION: QuestionData = {
+  question: 'Назовите самый популярный ответ на вопрос: "Что можно найти в женской сумочке?"',
+  answers: [
+    { text: 'Помада', points: 40 },
+    { text: 'Зеркало', points: 25 },
+    { text: 'Расчёска', points: 15 },
+    { text: 'Телефон', points: 10 },
+    { text: 'Ключи', points: 5 },
+    { text: 'Деньги', points: 5 }
+  ]
+}
+
 /** Вопросы по умолчанию при ошибке загрузки или отсутствии public/questions.json */
 export const DEFAULT_QUESTIONS: QuestionData[] = [
   {

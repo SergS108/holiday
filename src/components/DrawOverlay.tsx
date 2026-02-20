@@ -19,6 +19,11 @@ export function DrawOverlay({ state, onPress, onTransitionEnd }: DrawOverlayProp
 
   return (
     <div className="draw-overlay">
+      {state.drawQuestion && (
+        <div className="draw-question">
+          {state.drawQuestion}
+        </div>
+      )}
       <div className="raffle-buttons-container">
         <button
           type="button"
@@ -39,7 +44,7 @@ export function DrawOverlay({ state, onPress, onTransitionEnd }: DrawOverlayProp
       </div>
       {firstPressed && (
         <div className="raffle-result">
-          {(state.leftTeam.drawPressedFirst ? state.leftTeam.name : state.rightTeam.name)} нажала первой!
+          Команда «{(state.leftTeam.drawPressedFirst ? state.leftTeam.name : state.rightTeam.name)}» первой начинает игру
         </div>
       )}
     </div>

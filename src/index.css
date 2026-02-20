@@ -245,6 +245,13 @@ button:disabled {
   border: 3px solid white;
 }
 
+/* Блок 4: золотая подсветка команды, набравшей больше очков */
+.team-panel.block4-leader {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.35) 0%, rgba(218, 165, 32, 0.4) 100%);
+  box-shadow: 0 0 24px rgba(255, 215, 0, 0.6);
+  border: 3px solid rgba(255, 215, 0, 0.9);
+}
+
 .team-name {
   font-size: clamp(1rem, 2vh, 1.5rem);
   font-weight: bold;
@@ -324,6 +331,20 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Подпись блока внизу панели (x1, x2, x3, ¿) */
+.team-block-label {
+  margin-top: auto;
+  padding-top: clamp(0.75rem, 2vh, 1.5rem);
+  font-size: clamp(5rem, 16vh, 10rem);
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 255, 255, 0.15);
+  letter-spacing: 0.02em;
+  line-height: 1;
+  flex-shrink: 0;
+  transform: translateY(-33%);
 }
 
 /* Крестики промаха — капсулы, красные линии от края до края */
@@ -657,6 +678,23 @@ button:disabled {
   justify-content: center;
   z-index: 1000;
   backdrop-filter: blur(2px);
+  padding: clamp(1rem, 2vh, 2rem);
+}
+
+.draw-question {
+  width: 100%;
+  max-width: 1200px;
+  text-align: center;
+  font-size: clamp(1.5rem, 3vh, 2.5rem);
+  font-weight: bold;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  margin-bottom: clamp(1.5rem, 3vh, 3rem);
+  padding: clamp(0.75rem, 1.5vh, 1.5rem) clamp(1rem, 2vh, 2rem);
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: clamp(8px, 1.5vh, 16px);
+  line-height: 1.4;
+  flex-shrink: 0;
 }
 
 .raffle-buttons-container {
@@ -751,6 +789,88 @@ button:disabled {
   }
 }
 
+/* Финальный экран игры */
+.game-end-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  padding: clamp(2rem, 4vh, 4rem);
+  text-align: center;
+}
+
+.game-end-title {
+  font-size: clamp(2.5rem, 6vh, 4rem);
+  font-weight: bold;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  margin-bottom: clamp(2rem, 4vh, 4rem);
+}
+
+.game-end-scores {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(2rem, 4vh, 4rem);
+  margin-bottom: clamp(2rem, 4vh, 3rem);
+  flex-wrap: wrap;
+}
+
+.game-end-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1rem, 2vh, 1.5rem);
+  padding: clamp(1.5rem, 3vh, 2.5rem);
+  border-radius: clamp(12px, 2vh, 20px);
+  background: rgba(255, 255, 255, 0.1);
+  min-width: clamp(200px, 25vw, 300px);
+  transition: all 0.3s ease;
+}
+
+.game-end-team.winner {
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 clamp(20px, 3vh, 30px) rgba(255, 255, 255, 0.5);
+  border: 3px solid white;
+  transform: scale(1.05);
+}
+
+.game-end-team-name {
+  font-size: clamp(1.5rem, 3vh, 2.5rem);
+  font-weight: bold;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.game-end-team-score {
+  font-size: clamp(3rem, 7vh, 5rem);
+  font-weight: bold;
+  color: #ffd700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.game-end-vs {
+  font-size: clamp(1.5rem, 3vh, 2.5rem);
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.game-end-winner {
+  font-size: clamp(1.8rem, 4vh, 3rem);
+  font-weight: bold;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  padding: clamp(1rem, 2vh, 1.5rem) clamp(2rem, 4vh, 3rem);
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: clamp(12px, 2vh, 20px);
+}
+
+.game-end-winner strong {
+  color: #ffd700;
+}
+
 @media (max-width: 768px) {
   .question-block {
     font-size: clamp(1.2rem, 2.5vh, 1.8rem);
@@ -798,5 +918,14 @@ button:disabled {
 
   .center-zone {
     max-width: 100%;
+  }
+
+  .game-end-scores {
+    flex-direction: column;
+    gap: clamp(1.5rem, 3vh, 2rem);
+  }
+
+  .game-end-vs {
+    transform: rotate(90deg);
   }
 }
