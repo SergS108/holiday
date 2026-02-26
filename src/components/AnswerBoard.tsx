@@ -30,7 +30,7 @@ export function AnswerBoard({
       {answers.map((row, index) => (
         <div
           key={row.id}
-          className={`answer-row ${row.revealed ? 'revealed' : 'hidden'} ${row.revealedAtEnd ? 'revealed-at-end' : ''}`}
+          className={`answer-row ${row.revealed ? 'revealed' : 'hidden'} ${row.revealedAtEnd ? 'revealed-at-end' : ''} ${row.assignedToTeam === 'left' ? 'block4-assigned-left' : ''} ${row.assignedToTeam === 'right' ? 'block4-assigned-right' : ''}`}
           role={pickMode || onReveal ? 'button' : undefined}
           tabIndex={pickMode || onReveal ? 0 : undefined}
           onClick={() => handleClick(index)}

@@ -8,6 +8,8 @@ interface GameControlsProps {
   isLastQuestion?: boolean
   /** Текст кнопки перехода (в блоке 4 — «Игра окончена») */
   nextButtonLabel?: string
+  /** Блок 4: все карточки открыты — показать кнопку завершения игры */
+  showFinishGameButton?: boolean
 }
 
 export function GameControls({
@@ -18,11 +20,12 @@ export function GameControls({
   canWrong = true,
   allRevealed = false,
   isLastQuestion = false,
-  nextButtonLabel = 'Следующий раунд / вопрос'
+  nextButtonLabel = 'Следующий раунд / вопрос',
+  showFinishGameButton = false
 }: GameControlsProps) {
   const showWrong = (screenPhase === 'main_play' || screenPhase === 'draw_answers' || screenPhase === 'other_guess') && canWrong
   const showRevealAll = screenPhase === 'round_end' && !allRevealed
-  const showNext = screenPhase === 'round_end' && !isLastQuestion
+  const showNext = (screenPhase === 'round_end' && !isLastQuestion) || showFinishGameButton
 
   return (
     <div className="controls">

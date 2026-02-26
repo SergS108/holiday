@@ -18,6 +18,12 @@ interface TeamPanelProps {
   drawButtonDisabled?: boolean
   /** Подпись блока внизу панели: "x1", "x2", "x3", "¿" */
   blockLabel?: string
+  /** Блок 4: показать круглую кнопку «начислить очки этой команде» */
+  showBlock4AssignButton?: boolean
+  /** Блок 4: нажатие — начислить очки последней открытой карточки этой команде */
+  onBlock4Assign?: () => void
+  /** Блок 4: кнопка неактивна, пока нет открытой карточки (нет ожидающих очков) */
+  block4AssignDisabled?: boolean
 }
 
 export function TeamPanel({
@@ -31,7 +37,10 @@ export function TeamPanel({
   showDrawButton,
   onDrawButtonPress,
   drawButtonDisabled,
-  blockLabel
+  blockLabel,
+  showBlock4AssignButton,
+  onBlock4Assign,
+  block4AssignDisabled
 }: TeamPanelProps) {
   const pressed = team.drawPressedFirst === true
 
@@ -69,6 +78,18 @@ export function TeamPanel({
           </div>
         )}
       </div>
+      {showBlock4AssignButton && (
+        <div className="block4-assign-slot">
+          <button
+            type="button"
+            className={`draw-btn block4-assign ${team.id === 'left' ? 'block4-assign-left' : 'block4-assign-right'}`}
+            onClick={onBlock4Assign}
+            disabled={block4AssignDisabled}
+            title="Начислить очки этой команде"
+            aria-label={`Начислить очки команде ${team.name}`}
+          />
+        </div>
+      )}
       {blockLabel != null && blockLabel !== '' && (
         <div className="team-block-label" aria-hidden>
           {blockLabel}

@@ -13,7 +13,7 @@ export function DrawOverlay({ state, onPress, onTransitionEnd }: DrawOverlayProp
 
   useEffect(() => {
     if (phase !== 'first_pressed') return
-    const t = setTimeout(onTransitionEnd, 1200)
+    const t = setTimeout(onTransitionEnd, 3000)
     return () => clearTimeout(t)
   }, [phase, onTransitionEnd])
 
@@ -42,11 +42,13 @@ export function DrawOverlay({ state, onPress, onTransitionEnd }: DrawOverlayProp
           {state.rightTeam.drawPressedFirst ? '✓ Первая!' : state.rightTeam.name}
         </button>
       </div>
+      <div className="raffle-result-container">
       {firstPressed && (
         <div className="raffle-result">
           Команда «{(state.leftTeam.drawPressedFirst ? state.leftTeam.name : state.rightTeam.name)}» первой начинает игру
         </div>
       )}
+      </div>
     </div>
   )
 }

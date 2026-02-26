@@ -58,6 +58,34 @@ button:disabled {
   overflow: hidden;
 }
 
+.app > *:not(.start-screen-bg) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Первый экран: фоновая картинка тюльпанов на весь экран */
+.app--start-screen {
+  padding: 0;
+}
+.start-screen-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: url('/assets/tulip.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.app--start-screen .start-teams-row,
+.app--start-screen .app-copyright {
+  position: relative;
+  z-index: 1;
+}
+.app--start-screen .start-teams-row {
+  padding: clamp(0.5rem, 2vh, 2rem);
+  flex: 1;
+}
+
 /* Стартовая страница */
 .start-teams-row {
   display: flex;
@@ -120,7 +148,7 @@ button:disabled {
 
 .start-title {
   color: white;
-  font-size: clamp(1.8rem, 5vh, 4rem);
+  font-size: clamp(8rem, 13vh, 10rem);
   font-weight: 800;
   margin: 0;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
@@ -134,11 +162,15 @@ button:disabled {
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.start-company {
+/* Копирайт внизу приложения */
+.app-copyright {
   margin: 0;
-  font-size: clamp(0.7rem, 1.2vh, 0.9rem);
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 500;
+  margin-top: auto;
+  padding: clamp(0.5rem, 1vh, 0.75rem) clamp(1rem, 2vw, 1.5rem);
+  font-size: clamp(0.65rem, 1.2vh, 0.8rem);
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  flex-shrink: 0;
 }
 
 .btn-start {
@@ -147,10 +179,10 @@ button:disabled {
   border-radius: 50%;
   font-size: clamp(1rem, 2vh, 1.5rem);
   font-weight: bold;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  color: white;
+  background: linear-gradient(135deg, #ffd700 0%, #ffb347 50%, #daa520 100%);
+  color: #2c1810;
   border: none;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 215, 0, 0.3);
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
@@ -158,12 +190,12 @@ button:disabled {
   padding: 0;
   cursor: pointer;
   transform: translateZ(0);
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 .btn-start:hover:not(:disabled) {
   transform: scale(1.1) translateZ(0);
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.6), 0 0 28px rgba(255, 215, 0, 0.45);
 }
 
 .btn-start:active:not(:disabled) {
@@ -331,6 +363,36 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Блок 4: слот под кнопку — фиксированная высота, контент не прыгает при появлении кнопки */
+.block4-assign-slot {
+  min-height: clamp(150px, 18.5vh, 220px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Блок 4: на 1/3 меньше чем на экране розыгрыша, не растягивать */
+.draw-btn.block4-assign {
+  width: clamp(134px, 16.67vh, 200px);
+  height: clamp(134px, 16.67vh, 200px);
+  min-width: clamp(134px, 16.67vh, 200px);
+  min-height: clamp(134px, 16.67vh, 200px);
+  margin-top: 0;
+  padding: 0;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.draw-btn.block4-assign-left {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #e84a7a 100%);
+}
+.draw-btn.block4-assign-right {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 50%, #0099cc 100%);
+}
+.draw-btn.block4-assign:disabled {
+  cursor: not-allowed;
 }
 
 /* Подпись блока внизу панели (x1, x2, x3, ¿) */
@@ -566,6 +628,22 @@ button:disabled {
   opacity: 0.9;
 }
 
+/* Блок 4: карточка окрашена в цвет команды, которой присудили ответ */
+.answer-row.revealed.revealed-at-end.block4-assigned-left {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #e84a7a 100%);
+}
+.answer-row.revealed.revealed-at-end.block4-assigned-left .face-back {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #e84a7a 100%);
+  opacity: 1;
+}
+.answer-row.revealed.revealed-at-end.block4-assigned-right {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 50%, #0099cc 100%);
+}
+.answer-row.revealed.revealed-at-end.block4-assigned-right .face-back {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 50%, #0099cc 100%);
+  opacity: 1;
+}
+
 .answer-hidden,
 .answer-content {
   display: flex;
@@ -609,6 +687,7 @@ button:disabled {
 .controls {
   text-align: center;
   width: 100%;
+  height: 2.25rem;
   display: flex;
   justify-content: center;
   gap: clamp(0.5rem, 1vh, 1rem);
@@ -616,6 +695,7 @@ button:disabled {
   padding: 0;
   margin-top: clamp(0.5rem, 1vh, 1rem);
   flex-shrink: 0;
+  margin-bottom: 1.2rem;
 }
 
 .controls button {
@@ -653,6 +733,17 @@ button:disabled {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
 }
 
+/* Кнопка «Начать игру» — золотой градиент (приоритет над .btn-next) */
+.btn-next.btn-start {
+  background: linear-gradient(135deg, #ffd700 0%, #ffb347 50%, #daa520 100%);
+  color: #2c1810;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 215, 0, 0.3);
+}
+.btn-next.btn-start:hover:not(:disabled) {
+  transform: scale(1.1) translateZ(0);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.6), 0 0 28px rgba(255, 215, 0, 0.45);
+}
+
 .btn-reveal-all {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -666,19 +757,12 @@ button:disabled {
 
 /* Overlay для розыгрыша */
 .draw-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
+  /* width: 100vw; */
+  height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  backdrop-filter: blur(2px);
-  padding: clamp(1rem, 2vh, 2rem);
 }
 
 .draw-question {
@@ -704,6 +788,14 @@ button:disabled {
   justify-content: space-between;
   width: 100%;
   padding: 0 2rem;
+}
+
+.raffle-result-container {
+  width: 100%;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .raffle-result {
@@ -893,11 +985,11 @@ button:disabled {
     padding: clamp(0.5rem, 0.8vh, 0.8rem) clamp(1rem, 1.5vh, 1.5rem);
   }
 
-  .draw-overlay {
+  /* .draw-overlay {
     flex-direction: column;
     gap: clamp(1rem, 2vh, 2rem);
     padding: clamp(1rem, 2vh, 2rem) clamp(0.5rem, 1vh, 1rem);
-  }
+  } */
 
   .raffle-buttons-container {
     flex-direction: column;

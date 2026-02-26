@@ -18,6 +18,7 @@ export type GameAction =
   | { type: 'OTHER_TEAM_WRONG_GUESS' }
   | { type: 'REVEAL_ALL_REMAINING' }
   | { type: 'REVEAL_REMAINING_ONE'; answerIndex: number }
+  | { type: 'BLOCK4_ASSIGN_POINTS'; teamId: TeamId }
   | { type: 'NEXT_QUESTION'; drawQuestion?: QuestionData; mainQuestion?: QuestionData }
   | { type: 'GAME_END' }
   | { type: 'RESET_NAMES'; leftName: string; rightName: string }
@@ -177,7 +178,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       
       return {
         ...state,
-        drawShown: true, // Помечаем, что розыгрыш уже был показан
+        drawShown: true,
+        questionIndex: 1,
         question: action.question.question,
         answers,
         gameFund: 0,
@@ -296,40 +298,20 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'REVEAL_ANSWER': {
       const idx = action.answerIndex
       if (idx < 0 || idx >= state.answers.length || state.answers[idx].revealed) return state
-      const answers = state.answers.map((a, i) => i === idx ? { ...a, revealed: true } : a)
-      const points = state.answers[idx].points
       const isBlock4 = state.roundIndex === 3
-      const block4ActionCount = state.block4ActionCount ?? 0
+      const answers = state.answers.map((a, i) =>
+        i === idx ? { ...a, revealed: true, ...(isBlock4 ? { revealedAtEnd: true } : {}) } : a
+      )
+      const points = state.answers[idx].points
 
-      if (isBlock4 && state.playingTeam) {
-        // Блок 4: очки сразу на счёт команды, без фонда
+      if (isBlock4) {
+        // Блок 4: ведущий открывает карточку; очки начисляются только после нажатия кнопки команды
         const addedPoints = 1 * points
-        const team = getTeam(state, state.playingTeam)
-        const updatedTeam = { ...team, score: team.score + addedPoints }
-        const afterReveal = state.playingTeam === 'left'
-          ? { ...state, leftTeam: updatedTeam, rightTeam: state.rightTeam }
-          : { ...state, rightTeam: updatedTeam, leftTeam: state.leftTeam }
-        const withAnswers = { ...afterReveal, answers }
-
-        if (block4ActionCount === 1) {
-          // Второй ход — раунд заканчивается, выделяем команду с большим счётом
-          const leftScore = withAnswers.leftTeam.score
-          const rightScore = withAnswers.rightTeam.score
-          const roundWinner: TeamId | null = leftScore > rightScore ? 'left' : rightScore > leftScore ? 'right' : null
-          return {
-            ...withAnswers,
-            gameFund: 0,
-            screenPhase: 'round_end',
-            mainPhase: 'round_end',
-            roundWinner,
-            block4ActionCount: undefined
-          }
-        }
-        // Первый ход — передаём ход другой команде
         return {
-          ...withAnswers,
-          playingTeam: getOtherTeamId(state.playingTeam),
-          block4ActionCount: 1
+          ...state,
+          answers,
+          block4PendingPoints: addedPoints,
+          block4LastRevealedIndex: idx
         }
       }
 
@@ -344,7 +326,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         return {
           ...next,
           answers,
-          gameFund: 0,
+          gameFund: state.gameFund + addedPoints,
           screenPhase: 'round_end',
           mainPhase: 'round_end',
           roundWinner: state.playingTeam
@@ -359,34 +341,15 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'WRONG_ANSWER': {
       if (!state.playingTeam) return state
+      const isBlock4 = state.roundIndex === 3
+      if (isBlock4) return state
+
       const team = getTeam(state, state.playingTeam)
       const newMisses = team.misses + 1
       const updatedTeam = { ...team, misses: newMisses }
       const next = state.playingTeam === 'left'
         ? { ...state, leftTeam: updatedTeam }
         : { ...state, rightTeam: updatedTeam }
-
-      const isBlock4 = state.roundIndex === 3
-      const block4ActionCount = state.block4ActionCount ?? 0
-      if (isBlock4) {
-        if (block4ActionCount === 1) {
-          const leftScore = next.leftTeam.score
-          const rightScore = next.rightTeam.score
-          const roundWinner: TeamId | null = leftScore > rightScore ? 'left' : rightScore > leftScore ? 'right' : null
-          return {
-            ...next,
-            screenPhase: 'round_end',
-            mainPhase: 'round_end',
-            roundWinner,
-            block4ActionCount: undefined
-          }
-        }
-        return {
-          ...next,
-          playingTeam: getOtherTeamId(state.playingTeam),
-          block4ActionCount: 1
-        }
-      }
 
       if (newMisses >= 3) {
         return {
@@ -414,7 +377,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         : { ...withRevealed, rightTeam: { ...otherTeam, score: otherTeam.score + newFund } }
       return {
         ...withOtherScore,
-        gameFund: 0,
+        gameFund: newFund,
         screenPhase: 'round_end',
         mainPhase: 'round_end',
         roundWinner: otherId
@@ -433,7 +396,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         : { ...state, rightTeam: updatedPlaying, leftTeam: updatedOther }
       return {
         ...next,
-        gameFund: 0,
         screenPhase: 'round_end',
         mainPhase: 'round_end',
         roundWinner: state.playingTeam
@@ -455,6 +417,46 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, answers }
     }
 
+    case 'BLOCK4_ASSIGN_POINTS': {
+      if (state.roundIndex !== 3 || state.screenPhase !== 'main_play') return state
+      const pending = state.block4PendingPoints ?? 0
+      if (pending <= 0) return state
+      const teamId = action.teamId
+      const lastIdx = state.block4LastRevealedIndex
+      const answers =
+        lastIdx != null && lastIdx >= 0 && lastIdx < state.answers.length
+          ? state.answers.map((a, i) => (i === lastIdx ? { ...a, assignedToTeam: teamId } : a))
+          : state.answers
+      const team = getTeam(state, teamId)
+      const updatedTeam = { ...team, score: team.score + pending }
+      const next = teamId === 'left'
+        ? { ...state, leftTeam: updatedTeam, answers }
+        : { ...state, rightTeam: updatedTeam, answers }
+      const block4LeftButtonPressed = teamId === 'left' || state.block4LeftButtonPressed
+      const block4RightButtonPressed = teamId === 'right' || state.block4RightButtonPressed
+      const allRevealed = next.answers.every(a => a.revealed)
+      if (allRevealed) {
+        const leftScore = next.leftTeam.score
+        const rightScore = next.rightTeam.score
+        const roundWinner: TeamId | null = leftScore > rightScore ? 'left' : rightScore > leftScore ? 'right' : null
+        return {
+          ...next,
+          block4PendingPoints: undefined,
+          block4LeftButtonPressed,
+          block4RightButtonPressed,
+          screenPhase: 'round_end',
+          mainPhase: 'round_end',
+          roundWinner
+        }
+      }
+      return {
+        ...next,
+        block4PendingPoints: undefined,
+        block4LeftButtonPressed,
+        block4RightButtonPressed
+      }
+    }
+
     case 'NEXT_QUESTION': {
       const nextIndex = state.questionIndex + 1
       // После первого розыгрыша сразу переходим к основному вопросу без розыгрыша
@@ -465,13 +467,15 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         const nextRoundInBlock = isLeavingBlock4 ? 0 : (state.roundInBlock + 1) % 2
         const nextRoundIndex = isLeavingBlock4 ? state.roundIndex + 1 : (nextRoundInBlock === 0 ? state.roundIndex + 1 : state.roundIndex)
         
-        // Определяем играющую команду
+        // Определяем играющую команду (в блоке 4 нет — ведущий открывает карточки и нажимает кнопки)
         let playingTeam: TeamId | null = null
-        let block4ActionCount: number | undefined
+        let block4PendingPoints: number | undefined
+        let block4LeftButtonPressed: boolean | undefined
+        let block4RightButtonPressed: boolean | undefined
         if (nextRoundIndex === 3) {
-          // Блок 4: начинает команда с меньшим счётом
-          playingTeam = state.leftTeam.score <= state.rightTeam.score ? 'left' : 'right'
-          block4ActionCount = 0
+          block4PendingPoints = undefined
+          block4LeftButtonPressed = false
+          block4RightButtonPressed = false
         } else {
           const firstTeam = state.drawFirstTeam || (state.roundInBlock === 0 ? state.playingTeam : null)
           if (firstTeam) {
@@ -497,7 +501,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           playingTeam,
           mainPhase: 'playing',
           roundWinner: null,
-          block4ActionCount
+          block4PendingPoints,
+          block4LeftButtonPressed,
+          block4RightButtonPressed,
+          block4LastRevealedIndex: undefined
         }
       }
       return state
