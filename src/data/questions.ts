@@ -35,6 +35,6 @@ export const DEFAULT_QUESTIONS: QuestionData[] = [
 
 export function toAnswerRows(answers: { text: string; points: number }[]): AnswerRow[] {
   return answers
-    .sort((a, b) => b.points - a.points)
+    // .sort((a, b) => b.points - a.points)
     .map((a, id) => ({ id, text: a.text, points: a.points, revealed: false }))
 }
