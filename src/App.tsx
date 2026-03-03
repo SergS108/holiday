@@ -7,8 +7,6 @@ import { AnswerBoard } from './components/AnswerBoard'
 import { GameControls } from './components/GameControls'
 import type { TeamId } from './types/game'
 
-const ROUND_NAMES = ['Простая игра', 'Двойная игра', 'Тройная игра', 'Игра наоборот']
-
 const TEAM_NAMES_KEY_LEFT = 'game100_teamLeft'
 const TEAM_NAMES_KEY_RIGHT = 'game100_teamRight'
 
@@ -86,16 +84,8 @@ export default function App() {
     dispatch({ type: 'REVEAL_ANSWER', answerIndex: index })
   }, [])
 
-  const handleWrongAnswer = useCallback(() => {
-    dispatch({ type: 'WRONG_ANSWER' })
-  }, [])
-
   const handleOtherTeamGuess = useCallback((index: number) => {
     dispatch({ type: 'OTHER_TEAM_ONE_GUESS', answerIndex: index })
-  }, [])
-
-  const handleOtherTeamWrong = useCallback(() => {
-    dispatch({ type: 'OTHER_TEAM_WRONG_GUESS' })
   }, [])
 
   const handleRevealAll = useCallback(() => {
@@ -124,6 +114,18 @@ export default function App() {
   const roundEndMode = state.screenPhase === 'round_end'
   const gameEndMode = state.screenPhase === 'game_end'
   const allRevealed = state.answers.length > 0 && state.answers.every((a) => a.revealed)
+
+  const canWrong =
+    ((mainPlayMode && state.roundIndex !== 3) || otherGuessMode) && state.playingTeam !== null
+
+  const handleWrongForCurrentAnsweringTeam = useCallback(() => {
+    if (!canWrong) return
+    if (state.screenPhase === 'other_guess') {
+      dispatch({ type: 'OTHER_TEAM_WRONG_GUESS' })
+    } else {
+      dispatch({ type: 'WRONG_ANSWER' })
+    }
+  }, [canWrong, state.screenPhase])
 
   const startLeftInputRef = useRef<HTMLInputElement>(null)
   const startRightInputRef = useRef<HTMLInputElement>(null)
@@ -195,6 +197,7 @@ export default function App() {
     const rightDisplayName = getDisplayName(state.rightTeam.name, 'right')
     return (
       <div className="app">
+        <div className="app-bg" aria-hidden />
         <div className="game-end-screen">
           <h1 className="game-end-title">Игра окончена!</h1>
           <div className="game-end-scores">
@@ -202,7 +205,7 @@ export default function App() {
               <div className="game-end-team-name">{leftDisplayName}</div>
               <div className="game-end-team-score">{state.leftTeam.score}</div>
             </div>
-            <div className="game-end-vs">VS</div>
+            <div className="game-end-vs"></div>
             <div className={`game-end-team ${winner?.id === 'right' ? 'winner' : ''}`}>
               <div className="game-end-team-name">{rightDisplayName}</div>
               <div className="game-end-team-score">{state.rightTeam.score}</div>
@@ -217,7 +220,7 @@ export default function App() {
             <div className="game-end-winner">Ничья!</div>
           )}
         </div>
-        <footer className="app-copyright">© 2025 1M Солюшенс</footer>
+        <footer className="app-copyright">© 2026 1M Солюшенс</footer>
       </div>
     )
   }
@@ -287,8 +290,18 @@ export default function App() {
   const leftDisplayName = getDisplayName(state.leftTeam.name, 'left')
   const rightDisplayName = getDisplayName(state.rightTeam.name, 'right')
 
+  const answeringTeamId: TeamId | null = (() => {
+    if (!canWrong || !state.playingTeam) return null
+    if (mainPlayMode) return state.playingTeam
+    if (otherGuessMode) {
+      return state.playingTeam === 'left' ? 'right' : 'left'
+    }
+    return null
+  })()
+
   return (
     <div className="app">
+      <div className="app-bg" aria-hidden />
       {!showDrawOverlay && (
         <>
           <div className="question-header">
@@ -306,17 +319,21 @@ export default function App() {
               isRoundWinner={state.screenPhase === 'round_end' && state.roundWinner === 'left'}
               isBlock4Leader={state.roundIndex === 3 && state.screenPhase === 'round_end' && state.roundWinner === 'left'}
               showDrawButton={false}
-              blockLabel={['x1', 'x2', 'x3', '¿'][state.roundIndex % 4]}
               showBlock4AssignButton={state.roundIndex === 3 && state.screenPhase === 'main_play'}
               onBlock4Assign={() => dispatch({ type: 'BLOCK4_ASSIGN_POINTS', teamId: 'left' })}
               block4AssignDisabled={!(state.block4PendingPoints != null && state.block4PendingPoints > 0)}
+              onMissClick={answeringTeamId === 'left' ? handleWrongForCurrentAnsweringTeam : undefined}
             />
 
             <div className="center-area">
               <div className="round-title">
-                {ROUND_NAMES[state.roundIndex % ROUND_NAMES.length]} · Раунд {state.roundInBlock + 1} · Вопрос {state.questionIndex + 1}
+                Раунд {state.roundInBlock + 1} · Вопрос {state.questionIndex + 1}
               </div>
-              <div className="game-fund">{state.gameFund}</div>
+              <div className="game-fund-row">
+                <span className="game-fund-label" aria-hidden>{['x1', 'x2', 'x3', '¿'][state.roundIndex % 4]}</span>
+                <div className="game-fund">{state.gameFund}</div>
+                <span className="game-fund-label" aria-hidden>{['x1', 'x2', 'x3', '¿'][state.roundIndex % 4]}</span>
+              </div>
 
               <AnswerBoard
                 answers={state.answers}
@@ -333,16 +350,8 @@ export default function App() {
 
               <GameControls
                 screenPhase={state.screenPhase}
-                onWrongAnswer={() => {
-                  if (state.screenPhase === 'other_guess') {
-                    handleOtherTeamWrong()
-                  } else {
-                    handleWrongAnswer()
-                  }
-                }}
                 onRevealAllRemaining={handleRevealAll}
                 onNextQuestion={handleNextQuestion}
-                canWrong={(mainPlayMode && state.roundIndex !== 3) || otherGuessMode}
                 allRevealed={allRevealed}
                 isLastQuestion={state.questionIndex + 1 >= questions.length && state.roundIndex !== 3}
                 nextButtonLabel={state.roundIndex === 3 && (state.screenPhase === 'round_end' || (state.screenPhase === 'main_play' && (allRevealed || (state.block4LeftButtonPressed && state.block4RightButtonPressed)))) ? 'Игра окончена' : undefined}
@@ -358,10 +367,10 @@ export default function App() {
               isRoundWinner={state.screenPhase === 'round_end' && state.roundWinner === 'right'}
               isBlock4Leader={state.roundIndex === 3 && state.screenPhase === 'round_end' && state.roundWinner === 'right'}
               showDrawButton={false}
-              blockLabel={['x1', 'x2', 'x3', '¿'][state.roundIndex % 4]}
               showBlock4AssignButton={state.roundIndex === 3 && state.screenPhase === 'main_play'}
               onBlock4Assign={() => dispatch({ type: 'BLOCK4_ASSIGN_POINTS', teamId: 'right' })}
               block4AssignDisabled={!(state.block4PendingPoints != null && state.block4PendingPoints > 0)}
+              onMissClick={answeringTeamId === 'right' ? handleWrongForCurrentAnsweringTeam : undefined}
             />
           </div>
         </>
@@ -378,7 +387,7 @@ export default function App() {
           onTransitionEnd={handleDrawHide}
         />
       )}
-      <footer className="app-copyright">© 2025 1M Солюшенс</footer>
+      <footer className="app-copyright">© 2026 1M Солюшенс</footer>
     </div>
   )
 }

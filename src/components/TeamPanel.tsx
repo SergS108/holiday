@@ -16,14 +16,14 @@ interface TeamPanelProps {
   showDrawButton: boolean
   onDrawButtonPress?: () => void
   drawButtonDisabled?: boolean
-  /** Подпись блока внизу панели: "x1", "x2", "x3", "¿" */
-  blockLabel?: string
   /** Блок 4: показать круглую кнопку «начислить очки этой команде» */
   showBlock4AssignButton?: boolean
   /** Блок 4: нажатие — начислить очки последней открытой карточки этой команде */
   onBlock4Assign?: () => void
   /** Блок 4: кнопка неактивна, пока нет открытой карточки (нет ожидающих очков) */
   block4AssignDisabled?: boolean
+  /** Клик по любому крестику промаха: +1 к количеству неправильных ответов (порядок нажатия не важен) */
+  onMissClick?: () => void
 }
 
 export function TeamPanel({
@@ -37,10 +37,10 @@ export function TeamPanel({
   showDrawButton,
   onDrawButtonPress,
   drawButtonDisabled,
-  blockLabel,
   showBlock4AssignButton,
   onBlock4Assign,
-  block4AssignDisabled
+  block4AssignDisabled,
+  onMissClick
 }: TeamPanelProps) {
   const pressed = team.drawPressedFirst === true
 
@@ -51,9 +51,9 @@ export function TeamPanel({
     >
       <div className="team-name">{team.name}</div>
       <div className="team-badge-container">
-        {isPlaying && <div className="team-badge team-badge-playing">Играет</div>}
+        {/* {isPlaying && <div className="team-badge team-badge-playing">Играет</div>}
         {isOtherTeamTurn && <div className="team-badge team-badge-other">один ответ</div>}
-        {isAnsweringInDraw && <div className="team-badge team-badge-draw">отвечает</div>}
+        {isAnsweringInDraw && <div className="team-badge team-badge-draw">отвечает</div>} */}
       </div>
       <div className="team-score">{team.score}</div>
       <div className="team-content">
@@ -68,13 +68,31 @@ export function TeamPanel({
           </button>
         ) : (
           <div className="misses">
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className={`miss-dot ${i < team.misses ? 'active' : ''}`}
-                aria-hidden
-              />
-            ))}
+            {[0, 1, 2].map((i) => {
+              const isActive = i < team.misses
+              const canClick = onMissClick && team.misses < 3
+              return (
+                <div
+                  key={i}
+                  role={canClick ? 'button' : undefined}
+                  tabIndex={canClick ? 0 : undefined}
+                  aria-label={canClick ? 'Неверный ответ' : undefined}
+                  aria-hidden={!onMissClick}
+                  className={`miss-dot ${isActive ? 'active' : ''} ${canClick ? 'clickable' : ''}`}
+                  onClick={canClick ? onMissClick : undefined}
+                  onKeyDown={
+                    canClick
+                      ? (e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            onMissClick!()
+                          }
+                        }
+                      : undefined
+                  }
+                />
+              )
+            })}
           </div>
         )}
       </div>
@@ -88,11 +106,6 @@ export function TeamPanel({
             title="Начислить очки этой команде"
             aria-label={`Начислить очки команде ${team.name}`}
           />
-        </div>
-      )}
-      {blockLabel != null && blockLabel !== '' && (
-        <div className="team-block-label" aria-hidden>
-          {blockLabel}
         </div>
       )}
     </div>

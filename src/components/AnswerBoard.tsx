@@ -44,15 +44,10 @@ export function AnswerBoard({
           <div className="answer-card-inner">
             {/* Лицевая сторона (закрытая) */}
             <div className="face face-front">
-              <div className="answer-hidden">
-                <span className="answer-position">{index + 1}</span>
-                <span className="answer-placeholder">?</span>
-              </div>
             </div>
             {/* Оборотная сторона (открытая) — баллы и ответ */}
             <div className="face face-back">
               <div className="answer-content">
-                <span className="answer-position">{index + 1}</span>
                 <span className="answer-text">{row.text}</span>
                 <span className="answer-points">{row.points}</span>
               </div>

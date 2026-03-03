@@ -51,16 +51,27 @@ button:disabled {
 .app {
   height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: clamp(0.5rem, 2vh, 2rem);
+  padding: clamp(0.25rem, 1.2vh, 1.2rem);
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
 }
 
-.app > *:not(.start-screen-bg) {
+.app > *:not(.start-screen-bg):not(.app-bg) {
   position: relative;
   z-index: 1;
+}
+
+/* Фон для экранов игры (кроме первого): картинка 1m_dark.png на весь экран */
+.app-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: url('/assets/1m.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 /* Первый экран: фоновая картинка тюльпанов на весь экран */
@@ -168,7 +179,7 @@ button:disabled {
   margin-top: auto;
   padding: clamp(0.5rem, 1vh, 0.75rem) clamp(1rem, 2vw, 1.5rem);
   font-size: clamp(0.65rem, 1.2vh, 0.8rem);
-  color: rgba(255, 255, 255, 0.6);
+  color: #5c5346;
   text-align: center;
   flex-shrink: 0;
 }
@@ -205,7 +216,7 @@ button:disabled {
 /* Заголовок вопроса */
 .question-header {
   text-align: center;
-  margin-bottom: clamp(0.5rem, 2vh, 2rem);
+  margin-bottom: clamp(0.35rem, 1.4vh, 1.4rem);
   width: 100%;
   max-width: 1400px;
   margin-left: auto;
@@ -218,10 +229,8 @@ button:disabled {
   display: flex;
   align-items: stretch;
   justify-content: center;
-  gap: clamp(1rem, 2vh, 2rem);
+  gap: clamp(0.6rem, 1.4vh, 1.4rem);
   flex: 1;
-  max-width: 1400px;
-  margin: 0 auto;
   width: 100%;
   min-height: 0;
   overflow: hidden;
@@ -232,7 +241,7 @@ button:disabled {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(0.5rem, 1vh, 1rem);
+  gap: clamp(0.3rem, 0.7vh, 0.7rem);
   min-height: 0;
   overflow: hidden;
 }
@@ -265,33 +274,35 @@ button:disabled {
 }
 
 .team-panel:not(.playing):not(.other-turn):not(.draw-answering):not(.draw-winner) {
-  background: rgba(255, 255, 255, 0.1);
+  background: transparent;
+  border: 2px solid #b8b0a8;
 }
 
 .team-panel.playing,
 .team-panel.other-turn,
 .team-panel.draw-answering,
 .team-panel.draw-winner {
-  background: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-  border: 3px solid white;
+  background: rgba(0, 0, 0, 0.1);
+  box-shadow: none;
+  border: 2px solid #b8b0a8;
 }
 
 /* Блок 4: золотая подсветка команды, набравшей больше очков */
 .team-panel.block4-leader {
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.35) 0%, rgba(218, 165, 32, 0.4) 100%);
-  box-shadow: 0 0 24px rgba(255, 215, 0, 0.6);
-  border: 3px solid rgba(255, 215, 0, 0.9);
+  background: rgba(0, 0, 0, 0.1);
+  box-shadow: none;
+  border: 2px solid #b8b0a8;
 }
 
 .team-name {
-  font-size: clamp(1rem, 2vh, 1.5rem);
+  font-size: clamp(2rem, 4vh, 3rem);
   font-weight: bold;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  color: #b8860b;
+  text-shadow: none;
   text-align: center;
   padding: clamp(0.25rem, 0.5vh, 0.5rem) clamp(0.5rem, 1vh, 1rem);
-  background: rgba(255, 255, 255, 0.2);
+  background: transparent;
+  border: 1px solid #b8b0a8;
   border-radius: clamp(4px, 0.8vh, 8px);
   margin-bottom: 0;
 }
@@ -300,9 +311,8 @@ button:disabled {
 .team-panel.other-turn .team-name,
 .team-panel.draw-answering .team-name,
 .team-panel.draw-winner .team-name {
-  background: rgba(255, 255, 255, 0.3);
-  font-size: clamp(1.1rem, 2.2vh, 1.7rem);
-  transform: scale(1.05);
+  border: 1px solid #b8b0a8;
+  color: #b8860b;
 }
 
 .team-badge-container {
@@ -318,31 +328,34 @@ button:disabled {
   font-weight: 700;
   padding: clamp(0.2rem, 0.3vh, 0.3rem) clamp(0.5rem, 0.8vh, 0.8rem);
   border-radius: clamp(4px, 0.8vh, 8px);
-  color: white;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  color: #5c5346;
+  text-shadow: none;
+  border: 1px solid #a8a29e;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .team-badge-playing {
-  background: rgba(255, 255, 255, 0.3);
+  border-color: #6b635b;
 }
 
 .team-badge-other {
-  background: rgba(255, 255, 255, 0.25);
+  border-color: #9ca3af;
 }
 
 .team-badge-draw {
-  background: rgba(255, 255, 255, 0.25);
+  border-color: #9ca3af;
 }
 
 .team-score {
-  font-size: clamp(2rem, 5vh, 3.5rem);
+  font-size: clamp(4rem, 10vh, 7rem);
   font-weight: bold;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-  background: rgba(255, 255, 255, 0.2);
+  color: #b8860b;
+  text-shadow: none;
+  background: transparent;
+  border: 2px solid #a8a29e;
   padding: clamp(0.5rem, 1vh, 1rem) clamp(1rem, 2vh, 2rem);
   border-radius: clamp(6px, 1.2vh, 12px);
   min-width: clamp(100px, 10vw, 140px);
@@ -353,8 +366,7 @@ button:disabled {
 .team-panel.other-turn .team-score,
 .team-panel.draw-answering .team-score,
 .team-panel.draw-winner .team-score {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.1);
+  border: 2px solid #a8a29e;
 }
 
 .team-content {
@@ -401,39 +413,86 @@ button:disabled {
   padding-top: clamp(0.75rem, 2vh, 1.5rem);
   font-size: clamp(5rem, 16vh, 10rem);
   font-weight: 800;
-  color: rgba(255, 255, 255, 0.85);
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 255, 255, 0.15);
+  color: #5c5346;
+  text-shadow: none;
   letter-spacing: 0.02em;
   line-height: 1;
   flex-shrink: 0;
   transform: translateY(-33%);
 }
 
-/* Крестики промаха — капсулы, красные линии от края до края */
+/* Крестики промаха — капсулы, красные линии от края до края. Ширина как у блока очков команды */
 .misses {
   display: flex;
   flex-direction: column;
-  gap: clamp(0.4rem, 1vh, 0.9rem);
-  align-items: center;
+  gap: clamp(0.5rem, 1.2vh, 1rem);
+  align-items: stretch;
   justify-content: center;
-  min-width: clamp(65px, 9vw, 100px);
+  width: clamp(100px, 10vw, 140px);
+  min-width: clamp(100px, 10vw, 140px);
   margin-top: clamp(0.75rem, 2vh, 1.5rem);
 }
 
 .miss-dot {
   position: relative;
-  width: clamp(60px, 8vw, 85px);
-  height: clamp(36px, 5vh, 48px);
+  width: 100%;
+  height: clamp(48px, 7vh, 72px);
+  min-height: clamp(48px, 7vh, 72px);
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 9999px; /* pill/capsule */
   transition: all 0.3s ease;
-  border: clamp(2px, 0.3vh, 3px) solid;
+  border: clamp(3px, 0.5vh, 5px) solid;
   box-sizing: border-box;
   overflow: hidden;
 }
 
+.miss-dot.clickable {
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.miss-dot.clickable:hover {
+  background: rgba(0, 0, 0, 0.12);
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.miss-dot.clickable:active {
+  transform: scale(0.98);
+}
+
+/* Крест (диагональные линии) — у всех капсул, по умолчанию серый */
+.miss-dot::before,
+.miss-dot::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: clamp(8px, 1.2vh, 12px);
+  height: 250%;
+  background: #9ca3af;
+  transform-origin: center center;
+  box-shadow: none;
+}
+
+.miss-dot::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.miss-dot::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+/* Неактивные: серый фон и серый крест (уже задан выше) */
+.miss-dot:not(.active) {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: #a8a29e;
+  opacity: 1;
+}
+
+/* Активные: яркий фон и красный крест */
 .miss-dot.active {
   background: linear-gradient(135deg, #f7dc6f 0%, #e8c335 50%, #d4a517 100%);
   border-color: #fffde7;
@@ -442,32 +501,10 @@ button:disabled {
   color: #dc2626;
 }
 
-/* Красные диагональные линии от края до края */
 .miss-dot.active::before,
 .miss-dot.active::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: clamp(4px, 0.7vh, 6px);
-  height: 250%;
   background: #dc2626;
-  transform-origin: center center;
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
-}
-
-.miss-dot.active::before {
-  transform: translate(-50%, -50%) rotate(45deg);
-}
-
-.miss-dot.active::after {
-  transform: translate(-50%, -50%) rotate(-45deg);
-}
-
-.miss-dot:not(.active) {
-  background: rgba(200, 200, 200, 0.15);
-  border-color: rgba(255, 255, 255, 0.2);
-  opacity: 0.5;
 }
 
 .draw-btn.small {
@@ -489,8 +526,8 @@ button:disabled {
 .round-title {
   font-size: clamp(0.8rem, 1.5vh, 1rem);
   font-weight: bold;
-  color: white;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  color: #5c5346;
+  text-shadow: none;
   margin-bottom: clamp(0.25rem, 0.5vh, 0.5rem);
   text-align: center;
   flex-shrink: 0;
@@ -499,71 +536,84 @@ button:disabled {
 .question-block {
   width: 100%;
   text-align: center;
-  font-size: clamp(1.5rem, 3vh, 2.5rem);
+  font-size: clamp(2.25rem, 4.5vh, 3.75rem);
   font-weight: bold;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  color: #b8860b;
+  text-shadow: none;
   margin: 0;
   padding: clamp(0.75rem, 1.5vh, 1.5rem);
-  background: rgba(255, 255, 255, 0.1);
+  background: transparent;
+  border: 2px solid #b8b0a8;
   border-radius: clamp(8px, 1.5vh, 16px);
   line-height: 1.4;
   flex-shrink: 0;
 }
 
-.game-fund {
-  background: rgba(255, 255, 255, 0.95);
+.game-fund-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+  flex-shrink: 0;
+  color: #5c5346;
+  border: 2px solid #5c5346;
   border-radius: clamp(8px, 1.5vh, 16px);
   padding: clamp(0.75rem, 1.5vh, 1.5rem) clamp(1rem, 2vh, 2rem);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.game-fund-label {
+  font-size: clamp(3rem, 6vh, 4.5rem);
+  font-weight: 800;
+  line-height: 1;
+  min-width: 2ch;
+  text-align: center;
+}
+
+.game-fund {
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
   text-align: center;
   min-width: clamp(150px, 15vw, 200px);
   min-height: clamp(60px, 8vh, 80px);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  font-size: clamp(2rem, 4vh, 3rem);
+  font-size: clamp(3rem, 6vh, 4.5rem);
   font-weight: bold;
-  color: #667eea;
   flex-shrink: 0;
-}
-
-.game-fund::before {
-  content: 'Очки';
-  font-size: clamp(0.8rem, 1.2vh, 1rem);
-  color: #666;
-  margin-bottom: clamp(0.25rem, 0.5vh, 0.5rem);
-  display: block;
 }
 
 /* Карточки ответов */
 .answers-board {
-  max-width: 900px;
+  max-width: 1296px;
   width: 100%;
   margin: 0 auto;
-  padding: clamp(0.5rem, 2vh, 2rem);
+  padding: clamp(0.25rem, 1.2vh, 1.2rem);
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   perspective: 1000px;
   min-height: 0;
-  overflow-y: auto;
-  gap: clamp(0.4rem, 0.8vh, 0.8rem);
+  overflow: hidden;
+  gap: clamp(0.58rem, 1.15vh, 1.15rem);
 }
 
 .answer-row {
   position: relative;
   width: 100%;
-  height: clamp(50px, 7vh, 70px);
+  flex: 1 1 0;
+  min-height: clamp(36px, 5vh, 50px);
   perspective: 1000px;
-  border-radius: clamp(4px, 0.8vh, 8px);
+  border-radius: clamp(6px, 1.2vh, 12px);
   overflow: visible;
   background: transparent;
   border: none;
   box-shadow: none;
-  min-height: clamp(50px, 7vh, 70px);
-  flex-shrink: 0;
+  container-type: inline-size;
+  container-name: answer-card;
 }
 
 .answer-card-inner {
@@ -573,7 +623,7 @@ button:disabled {
   transform-style: preserve-3d;
   transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   border: none;
-  border-radius: clamp(4px, 0.8vh, 8px);
+  border-radius: clamp(6px, 1.2vh, 12px);
   cursor: pointer;
   background: transparent;
   padding: 0;
@@ -591,23 +641,29 @@ button:disabled {
   width: 100%;
   height: 100%;
   backface-visibility: hidden;
-  border-radius: clamp(4px, 0.8vh, 8px);
+  border-radius: clamp(6px, 1.2vh, 12px);
   display: flex;
   align-items: center;
-  padding: clamp(0.6rem, 1.2vh, 1.2rem) clamp(0.75rem, 1.5vh, 1.5rem);
+  padding: clamp(0.86rem, 1.73vh, 1.73rem) clamp(1.08rem, 2.16vh, 2.16rem);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
 }
 
 .face-front {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: #667eea;
+  background-image: url('/assets/1m_dark.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   color: white;
 }
 
 .face-back {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  color: white;
+  background: transparent;
+  color: #5c5346;
   transform: rotateY(180deg);
+  border: 2px solid #b8b0a8;
+  box-shadow: none;
 }
 
 .answer-row:not(.revealed):hover .face-front {
@@ -616,32 +672,25 @@ button:disabled {
 }
 
 .answer-row.revealed {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: transparent;
 }
 
-.answer-row.revealed.revealed-at-end {
-  background: linear-gradient(135deg, rgba(150, 150, 150, 0.8) 0%, rgba(120, 120, 120, 0.7) 100%);
+.answer-row.revealed .face-back {
+  border: 2px solid #a8a29e;
 }
 
 .answer-row.revealed.revealed-at-end .face-back {
-  background: linear-gradient(135deg, rgba(150, 150, 150, 0.9) 0%, rgba(120, 120, 120, 0.8) 100%);
-  opacity: 0.9;
+  border: 2px solid #b8b0a8;
 }
 
-/* Блок 4: карточка окрашена в цвет команды, которой присудили ответ */
-.answer-row.revealed.revealed-at-end.block4-assigned-left {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #e84a7a 100%);
-}
+/* Блок 4: карточка — рамка в цвет команды */
 .answer-row.revealed.revealed-at-end.block4-assigned-left .face-back {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #e84a7a 100%);
-  opacity: 1;
-}
-.answer-row.revealed.revealed-at-end.block4-assigned-right {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 50%, #0099cc 100%);
+  border-color: #e84a7a;
+  border-width: 3px;
 }
 .answer-row.revealed.revealed-at-end.block4-assigned-right .face-back {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 50%, #0099cc 100%);
-  opacity: 1;
+  border-color: #0099cc;
+  border-width: 3px;
 }
 
 .answer-hidden,
@@ -650,35 +699,48 @@ button:disabled {
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  min-width: 0;
   gap: 1rem;
 }
 
 .answer-position {
-  font-size: clamp(0.9rem, 1.5vh, 1.2rem);
+  font-size: clamp(2.16rem, 3.6vh, 2.88rem);
   font-weight: bold;
   min-width: clamp(20px, 3vw, 30px);
   opacity: 0.8;
 }
 
+.face-back .answer-position {
+  color: #5c5346;
+}
+
+.face-back .answer-text {
+  color: #5c5346;
+}
+
 .answer-placeholder {
-  font-size: clamp(1.1rem, 2vh, 1.5rem);
+  font-size: clamp(2.64rem, 4.8vh, 3.6rem);
   font-weight: bold;
   flex: 1;
   text-align: center;
 }
 
 .answer-text {
-  font-size: clamp(0.9rem, 1.5vh, 1.1rem);
+  font-size: clamp(2.16rem, 3.6vh, 2.64rem);
   font-weight: 600;
   flex: 1;
+  min-width: 0;
   text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .answer-points {
-  font-size: clamp(1rem, 1.8vh, 1.3rem);
+  font-size: clamp(2.4rem, 4.32vh, 3.12rem);
   font-weight: bold;
-  color: #ffd700;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  color: #b8860b;
+  text-shadow: none;
   min-width: clamp(35px, 5vw, 50px);
   text-align: right;
 }
@@ -706,13 +768,14 @@ button:disabled {
 }
 
 .btn-wrong {
-  background: linear-gradient(135deg, rgba(150, 150, 150, 0.6) 0%, rgba(120, 120, 120, 0.5) 100%);
-  color: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  background: transparent;
+  color: #5c5346;
+  border: 2px solid #9ca3af;
+  box-shadow: none;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  opacity: 0.8;
+  opacity: 1;
 }
 
 .btn-wrong:hover:not(:disabled) {
@@ -722,18 +785,27 @@ button:disabled {
 }
 
 .btn-next {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  color: white;
+  background: transparent;
+  color: #5c5346;
   font-weight: 700;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  border: 2px solid #9ca3af;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .btn-next:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+  opacity: 0.9;
 }
 
 /* Кнопка «Начать игру» — золотой градиент (приоритет над .btn-next) */
+.btn-next.btn-start,
+.btn-start {
+  border: 2px solid #daa520;
+}
 .btn-next.btn-start {
   background: linear-gradient(135deg, #ffd700 0%, #ffb347 50%, #daa520 100%);
   color: #2c1810;
@@ -745,14 +817,18 @@ button:disabled {
 }
 
 .btn-reveal-all {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
+  background: transparent;
+  color: #5c5346;
+  border: 2px solid #9ca3af;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .btn-reveal-all:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+  opacity: 0.9;
 }
 
 /* Overlay для розыгрыша */
@@ -769,25 +845,35 @@ button:disabled {
   width: 100%;
   max-width: 1200px;
   text-align: center;
-  font-size: clamp(1.5rem, 3vh, 2.5rem);
+  font-size: clamp(2.25rem, 4.5vh, 3.75rem);
   font-weight: bold;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  color: #b8860b;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
   margin-bottom: clamp(1.5rem, 3vh, 3rem);
   padding: clamp(0.75rem, 1.5vh, 1.5rem) clamp(1rem, 2vh, 2rem);
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.06);
   border-radius: clamp(8px, 1.5vh, 16px);
   line-height: 1.4;
   flex-shrink: 0;
 }
 
 .raffle-buttons-container {
-  display: flex;
-  gap: 0;
-  align-items: center;
-  justify-content: space-between;
+  position: relative;
   width: 100%;
-  padding: 0 2rem;
+  min-height: clamp(200px, 25vh, 300px);
+  flex-shrink: 0;
+}
+
+.raffle-buttons-container .draw-btn:first-of-type {
+  position: absolute;
+  left: 25%;
+  transform: translateX(-50%) translateZ(0);
+}
+
+.raffle-buttons-container .draw-btn:last-of-type {
+  position: absolute;
+  left: 75%;
+  transform: translateX(-50%) translateZ(0);
 }
 
 .raffle-result-container {
@@ -802,10 +888,10 @@ button:disabled {
   margin-top: clamp(1rem, 3vh, 3rem);
   font-size: clamp(1.2rem, 2.5vh, 2rem);
   font-weight: bold;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  color: #b8860b;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
   padding: clamp(0.75rem, 1.5vh, 1.5rem) clamp(1.5rem, 3vh, 3rem);
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.06);
   border-radius: clamp(8px, 1.5vh, 16px);
   animation: fadeIn 0.5s ease-in;
   flex-shrink: 0;
@@ -844,16 +930,19 @@ button:disabled {
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.raffle-buttons-container .draw-btn:first-of-type {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #e84a7a 100%);
-}
-
+.raffle-buttons-container .draw-btn:first-of-type,
 .raffle-buttons-container .draw-btn:last-of-type {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 50%, #0099cc 100%);
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 50%, #d1d5db 100%);
+  color: #5c5346;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.9);
 }
 
 .draw-btn:hover:not(:disabled) {
   transform: scale(1.1) translateZ(0);
+}
+
+.raffle-buttons-container .draw-btn:hover:not(:disabled) {
+  transform: translateX(-50%) scale(1.1) translateZ(0);
 }
 
 .draw-btn.pressed {
@@ -862,14 +951,15 @@ button:disabled {
   animation: pulse 1s ease-in-out;
 }
 
-.raffle-buttons-container .draw-btn.pressed:first-of-type {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%),
-              linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #e84a7a 100%);
+.raffle-buttons-container .draw-btn.pressed {
+  transform: translateX(-50%) scale(1.2) translateZ(0);
+  animation: pulse-raffle 1s ease-in-out;
 }
 
+.raffle-buttons-container .draw-btn.pressed:first-of-type,
 .raffle-buttons-container .draw-btn.pressed:last-of-type {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%),
-              linear-gradient(135deg, #4facfe 0%, #00f2fe 50%, #0099cc 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.25) 100%),
+              linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 50%, #d1d5db 100%);
 }
 
 @keyframes pulse {
@@ -878,6 +968,15 @@ button:disabled {
   }
   50% {
     transform: scale(1.3) translateZ(0);
+  }
+}
+
+@keyframes pulse-raffle {
+  0%, 100% {
+    transform: translateX(-50%) scale(1.2) translateZ(0);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.3) translateZ(0);
   }
 }
 
@@ -895,8 +994,8 @@ button:disabled {
 .game-end-title {
   font-size: clamp(2.5rem, 6vh, 4rem);
   font-weight: bold;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  color: #b8860b;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
   margin-bottom: clamp(2rem, 4vh, 4rem);
 }
 
@@ -929,43 +1028,55 @@ button:disabled {
 }
 
 .game-end-team-name {
-  font-size: clamp(1.5rem, 3vh, 2.5rem);
+  font-size: clamp(1.95rem, 3.9vh, 3.25rem);
   font-weight: bold;
-  color: white;
+  color: #b8860b;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.game-end-team.winner .game-end-team-name {
+  color: #b8860b;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .game-end-team-score {
-  font-size: clamp(3rem, 7vh, 5rem);
+  font-size: clamp(3.9rem, 9.1vh, 6.5rem);
   font-weight: bold;
-  color: #ffd700;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  color: #b8860b;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.game-end-team.winner .game-end-team-score {
+  color: #b8860b;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .game-end-vs {
+  width: 10rem;
   font-size: clamp(1.5rem, 3vh, 2.5rem);
   font-weight: bold;
-  color: rgba(255, 255, 255, 0.8);
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  color: #b8860b;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .game-end-winner {
   font-size: clamp(1.8rem, 4vh, 3rem);
   font-weight: bold;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  color: #b8860b;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
   padding: clamp(1rem, 2vh, 1.5rem) clamp(2rem, 4vh, 3rem);
   background: rgba(255, 255, 255, 0.15);
   border-radius: clamp(12px, 2vh, 20px);
 }
 
 .game-end-winner strong {
-  color: #ffd700;
+  color: #b8860b;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 @media (max-width: 768px) {
   .question-block {
-    font-size: clamp(1.2rem, 2.5vh, 1.8rem);
+    font-size: clamp(1.8rem, 3.75vh, 2.7rem);
   }
 
   .teams-row {
@@ -981,7 +1092,7 @@ button:disabled {
   }
 
   .team-score {
-    font-size: clamp(1.8rem, 4vh, 2.5rem);
+    font-size: clamp(3.6rem, 8vh, 5rem);
     padding: clamp(0.5rem, 0.8vh, 0.8rem) clamp(1rem, 1.5vh, 1.5rem);
   }
 
