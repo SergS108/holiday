@@ -67,9 +67,33 @@ export default function App() {
     []
   )
 
-  const handleDrawPress = useCallback((teamId: TeamId) => {
-    dispatch({ type: 'DRAW_BUTTON_PRESS', teamId })
+  const questionTimerIdRef = useRef<number | null>(null)
+  const timerAudioRef = useRef<HTMLAudioElement | null>(null)
+  const clearQuestionTimer = useCallback(() => {
+    if (questionTimerIdRef.current != null) {
+      clearTimeout(questionTimerIdRef.current)
+      questionTimerIdRef.current = null
+    }
+    if (timerAudioRef.current) {
+      timerAudioRef.current.pause()
+      timerAudioRef.current.currentTime = 0
+      timerAudioRef.current = null
+    }
   }, [])
+
+  const handleDrawPress = useCallback(
+    (teamId: TeamId) => {
+      clearQuestionTimer()
+      try {
+        const audio = new Audio('/voices/button.mp3')
+        audio.play().catch(() => {})
+      } catch {
+        // ignore
+      }
+      dispatch({ type: 'DRAW_BUTTON_PRESS', teamId })
+    },
+    [clearQuestionTimer]
+  )
 
   const handleDrawHide = useCallback(() => {
     dispatch({ type: 'DRAW_HIDE_BUTTONS' })
@@ -82,17 +106,41 @@ export default function App() {
 
   const handleRevealAnswer = useCallback((index: number) => {
     dispatch({ type: 'REVEAL_ANSWER', answerIndex: index })
+    try {
+      const audio = new Audio('/voices/true_answ.mp3')
+      audio.play().catch(() => {})
+    } catch {
+      // ignore
+    }
   }, [])
 
   const handleOtherTeamGuess = useCallback((index: number) => {
+    try {
+      const audio = new Audio('/voices/true_answ.mp3')
+      audio.play().catch(() => {})
+    } catch {
+      // ignore
+    }
     dispatch({ type: 'OTHER_TEAM_ONE_GUESS', answerIndex: index })
   }, [])
 
   const handleRevealAll = useCallback(() => {
+    try {
+      const audio = new Audio('/voices/true_answ.mp3')
+      audio.play().catch(() => {})
+    } catch {
+      // ignore
+    }
     dispatch({ type: 'REVEAL_ALL_REMAINING' })
   }, [])
 
   const handleRevealRemainingOne = useCallback((index: number) => {
+    try {
+      const audio = new Audio('/voices/true_answ.mp3')
+      audio.play().catch(() => {})
+    } catch {
+      // ignore
+    }
     dispatch({ type: 'REVEAL_REMAINING_ONE', answerIndex: index })
   }, [])
 
@@ -120,16 +168,35 @@ export default function App() {
 
   const handleWrongForCurrentAnsweringTeam = useCallback(() => {
     if (!canWrong) return
+
     if (state.screenPhase === 'other_guess') {
       dispatch({ type: 'OTHER_TEAM_WRONG_GUESS' })
     } else {
       dispatch({ type: 'WRONG_ANSWER' })
     }
-  }, [canWrong, state.screenPhase])
+
+    // В простых/двойных/тройных раундах при неправильном ответе проигрываем звук ошибки
+    if (state.roundIndex !== 3) {
+      try {
+        const audio = new Audio('/voices/error_answ.mp3')
+        audio.play().catch(() => {})
+      } catch {
+        // Игнорируем ошибки Audio в неподдерживаемой среде
+      }
+    }
+  }, [canWrong, state.screenPhase, state.roundIndex])
 
   const startLeftInputRef = useRef<HTMLInputElement>(null)
   const startRightInputRef = useRef<HTMLInputElement>(null)
   const startButtonRef = useRef<HTMLButtonElement>(null)
+
+  const timeoutAudioRef = useRef<HTMLAudioElement | null>(null)
+  const lastQuestionKeyRef = useRef<string | null>(null)
+
+  const finishPlayedRef = useRef<boolean>(false)
+  const introPlayedRef = useRef<boolean>(false)
+  const introAudioRef = useRef<HTMLAudioElement | null>(null)
+
   const handleStartTabKey = useCallback(
     (e: React.KeyboardEvent, from: 'left' | 'right' | 'button') => {
       if (e.key !== 'Tab') return
@@ -154,6 +221,99 @@ export default function App() {
     []
   )
   
+  // Таймер вопроса: 20 секунд + звук таймера и окончания
+  useEffect(() => {
+    // Определяем, какой вопрос сейчас показан: розыгрыш или основной
+    const questionKey = showDrawOverlay ? state.drawQuestion : state.question
+    const inQuestionPhase =
+      showDrawOverlay || state.screenPhase === 'main_play' || state.screenPhase === 'other_guess'
+
+    if (!questionKey || !inQuestionPhase) {
+      clearQuestionTimer()
+      lastQuestionKeyRef.current = null
+      return
+    }
+
+    if (lastQuestionKeyRef.current === questionKey) {
+      return
+    }
+    lastQuestionKeyRef.current = questionKey
+
+    clearQuestionTimer()
+
+    try {
+      const timerAudio = new Audio('/voices/timer.mp3')
+      timerAudio.loop = true
+      timerAudioRef.current = timerAudio
+      timerAudio.play().catch(() => {})
+
+      const id = window.setTimeout(() => {
+        if (timerAudioRef.current) {
+          timerAudioRef.current.pause()
+          timerAudioRef.current.currentTime = 0
+          timerAudioRef.current = null
+        }
+        try {
+          const timeoutAudio = new Audio('/voices/timeout.mp3')
+          timeoutAudioRef.current = timeoutAudio
+          timeoutAudio.play().catch(() => {})
+        } catch {
+          // ignore
+        }
+      }, 20000)
+
+      questionTimerIdRef.current = id as unknown as number
+    } catch {
+      // ignore audio errors
+    }
+
+    return () => {
+      clearQuestionTimer()
+    }
+  }, [showDrawOverlay, state.drawQuestion, state.question, state.screenPhase, clearQuestionTimer])
+
+  // Интро-звук: воспроизводим по первому действию пользователя (браузеры блокируют autoplay)
+  const playIntroOnce = useCallback(() => {
+    if (introPlayedRef.current) return
+    introPlayedRef.current = true
+    try {
+      const audio = new Audio('/voices/intro.mp3')
+      introAudioRef.current = audio
+      audio.play().catch(() => {})
+    } catch {
+      // ignore
+    }
+  }, [])
+
+  const stopIntroAudio = useCallback(() => {
+    if (introAudioRef.current) {
+      introAudioRef.current.pause()
+      introAudioRef.current.currentTime = 0
+      introAudioRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    if (hasDrawQuestion || hasMainQuestion) introPlayedRef.current = false
+  }, [hasDrawQuestion, hasMainQuestion])
+
+  // Финальный звук на последнем экране
+  useEffect(() => {
+    if (state.screenPhase === 'game_end') {
+      if (finishPlayedRef.current) return
+      finishPlayedRef.current = true
+      try {
+        const audio = new Audio('/voices/finish.mp3')
+        audio.play().catch(() => {})
+      } catch {
+        // ignore
+      }
+    } else {
+      // при выходе с финального экрана разрешаем воспроизвести снова при следующей игре
+      finishPlayedRef.current = false
+    }
+  }, [state.screenPhase])
+  
   // После завершения розыгрыша переходим к основной игре с вопросом 1 (Блок Простая игра Раунд 1)
   useEffect(() => {
     if (state.drawPhase === 'done' && state.drawFirstTeam && !hasMainQuestion && !state.drawShown) {
@@ -172,6 +332,8 @@ export default function App() {
   }, [state.leftTeam.name])
 
   const handleStartGame = useCallback(() => {
+    stopIntroAudio()
+
     const leftDisplayName = getDisplayName(state.leftTeam.name, 'left')
     const rightDisplayName = getDisplayName(state.rightTeam.name, 'right')
 
@@ -184,7 +346,7 @@ export default function App() {
     dispatch({ type: 'RESET_NAMES', leftName: leftDisplayName, rightName: rightDisplayName })
 
     handleStartRound(0)
-  }, [state.leftTeam.name, state.rightTeam.name, handleStartRound])
+  }, [state.leftTeam.name, state.rightTeam.name, handleStartRound, stopIntroAudio])
 
   // Финальный экран с результатами игры
   if (gameEndMode) {
@@ -227,7 +389,7 @@ export default function App() {
 
   if (!hasDrawQuestion && !hasMainQuestion) {
     return (
-      <div className="app app--start-screen">
+      <div className="app app--start-screen" onPointerDown={playIntroOnce} onClick={playIntroOnce}>
         <div className="start-screen-bg" aria-hidden />
         <div className="start-teams-row">
           <div className="start-team-block">

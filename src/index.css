@@ -273,9 +273,14 @@ button:disabled {
   justify-content: flex-start;
 }
 
-.team-panel:not(.playing):not(.other-turn):not(.draw-answering):not(.draw-winner) {
+/* Неактивная команда (не отвечает на вопрос) — рамка блока невидима */
+.team-panel:not(.playing):not(.other-turn):not(.draw-answering):not(.draw-winner):not(.block4-leader) {
   background: transparent;
-  border: 2px solid #b8b0a8;
+  border: 2px solid transparent;
+}
+
+.team-panel:not(.playing):not(.other-turn):not(.draw-answering):not(.draw-winner):not(.block4-leader) .team-name {
+  border-color: transparent;
 }
 
 .team-panel.playing,
